@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep 16 10:09:33 2021
-
 @author: D. Plottka, L. Hasenauer, M. Grajewski, FH Aachen University of Applied Sciences
 """
 import json as js
