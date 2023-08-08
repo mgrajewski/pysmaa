@@ -865,7 +865,7 @@ def p_from_ptilde_prom_2(ptilde, type_criterion, params, benefit):
         params[0, :]    -   p   p   p   q   s
         params[1, :]    -   -   -   q   p   -
 
-    benefit: 1D-numps array (bool)
+    benefit: 1D-numpy array (bool)
         if true, the i-th criterion is associated to a benefit, if false, to costs.
 
     Returns
