@@ -1,0 +1,1 @@
+{"mcda_type": "Promethee", "promethee_pref_func_type": 6, "promethee_c": 1, "promethee_q": 0, "input_file_P": "input_forward_smaa.xlsx", "input_file_ranks": "", "input_file_bounds": "", "output_file": "results_forward_smaa.xlsx", "path_to_pysmaa": "..\\", "n_samples": 1000}
