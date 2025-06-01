@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Feb 13 19:16:06 2021
-
-This module provides a simple example for computing weights from rankings with
-pysmaa.
+This module provides a simple example for computing weights from rankings with pysmaa.
 
 @author: Matthias Grajewski, FH Aachen University of Applied Sciences
+
+This file is part of the pysmaa python package, available at https://github.com/mgrajewski/pysmaa .
 """
 import sys
 from os import path
@@ -36,13 +35,15 @@ if __name__ == '__main__':
             sys.path.append(f'{path_to_pysmaa}/src')
 
 # now, we can import all the functions from pysmaa
-from weights_from_rankings import p_from_ptilde_saw, p_from_ptilde_prom_2, \
-                                  inscribe_maximal_ellipsoid, check_points, \
+from weights_from_rankings import inscribe_maximal_ellipsoid, check_points, \
                                   hrep_from_ranking, compute_margins, get_q
 
-from read_from_Excel import read_ptilde_from_excel, read_rankings_from_excel, \
+from read_from_Excel import read_perfmat_from_excel, read_rankings_from_excel, \
                             read_bounds_from_excel
 from inoutput import read_comp_pars
+
+from mcda_methods.SawSum import SawSum
+from mcda_methods.Promethee import Promethee
 
 
 def perform_simple_analysis(comp_pars_file):
@@ -80,8 +81,10 @@ def perform_simple_analysis(comp_pars_file):
     # read all computational parameters from the json-file
     this_pars = read_comp_pars(comp_pars_file)
 
-    # read the performance matrix
-    ptilde = read_ptilde_from_excel(this_pars.input_file_P)[0]
+    # read the performance matrix (we assume a fixed performance matrix for this analysis).
+    input_data = read_perfmat_from_excel(this_pars.input_file_P, 'Characteristics')
+    perfmat = input_data[0]
+    benefit = input_data[3]
 
     # read the rankings and the names of the corresponding milieus
     rankings, milieus = read_rankings_from_excel(this_pars.input_file_ranks)
@@ -89,11 +92,10 @@ def perform_simple_analysis(comp_pars_file):
     if this_pars.input_file_bounds != '':
         a_constraints, b_constraints, milieus = read_bounds_from_excel(this_pars.input_file_bounds)
 
-    ncrit = ptilde.shape[1]
+    ncrit = perfmat.shape[1]
 
     # choose preference function type in Promethee II
-    type_criterion = this_pars.promethee_pref_func_type*np.ones(ncrit, dtype=int)
-    benefit = np.full(ncrit, True)
+    type_criterion = this_pars.promethee_pref_func_type*np.ones(ncrit, dtype=np.int64)
 
     mcda_type = this_pars.mcda_type
 
@@ -115,12 +117,17 @@ def perform_simple_analysis(comp_pars_file):
             # setup of the parameter vector
             parameters = np.zeros((2, ncrit))
             parameters[0, :] = this_pars.promethee_c
-            p = p_from_ptilde_prom_2(ptilde, type_criterion, parameters, benefit)
+
+            # specify MCDA method
+            mcda_method = Promethee(type_criterion, parameters, benefit)
         elif mcda_type == 'SAW':
-            # compute performance matrix according to SAW
-            p = p_from_ptilde_saw(ptilde)
+            # specify MCDA method
+            mcda_method = SawSum(benefit)
         else:
             raise NameError('Invalid choice of MCDA model.')
+
+        # compute performance matrix according to MCDA method
+        p = mcda_method.p_from_perfmat(perfmat)
 
         # analyse the W_r
         if this_pars.input_file_bounds != '':
@@ -221,8 +228,7 @@ def perform_simple_analysis(comp_pars_file):
 
 
 # --------------------------------------------------------------------------
-# x
-# x This is the actual function call.
+# This is the actual function call.
 # --------------------------------------------------------------------------
 
 if __name__ == '__main__':
