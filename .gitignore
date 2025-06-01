@@ -1,0 +1,8 @@
+*.vtu
+*.asv
+*.ogv
+*.bmp
+*.pyc
+
+.idea
+.venv
